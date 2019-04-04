@@ -97,7 +97,9 @@ def parse_citation_dict(arguments, template_name='citation'):
     :param template_name: the name of the template used (e.g. 'cite journal', 'citation', and so on)
     :returns: a dictionary used as internal representation in wikipedia for rendering and export to other formats
     """
-    arguments['_tpl'] = template_name
+    split_template_name = template_name.split(' ')
+    template_name = split_template_name[1] if len(split_template_name) > 1 else 'citation'
+    arguments['CitationClass'] = template_name.lower()
     lua_table = lua.table_from(arguments)
     lua_result = lua.eval(luacode)(lua_table,
             ustring_match,

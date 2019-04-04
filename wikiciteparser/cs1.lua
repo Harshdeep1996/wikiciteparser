@@ -913,7 +913,7 @@ is handled in the main module.
 ]]
 
 local templates_using_volume = {'citation', 'audio-visual', 'book', 'conference', 'encyclopaedia', 'interview', 'journal', 'magazine', 'map', 'news', 'report', 'techreport'}
-local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news'}
+local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news', 'gazette'}
 local templates_not_using_page = {'audio-visual', 'episode', 'mailinglist', 'newsgroup', 'podcast', 'serial', 'sign', 'speech'}
 
 
@@ -4359,7 +4359,7 @@ local function citation0( config, args)
     The argument_wrapper facilitates the mapping of multiple aliases to single internal variable.
     ]]
     local A = argument_wrapper( args );
-    local i 
+    local i
 
     -- Pick out the relevant fields from the arguments.  Different citation templates
     -- define different field names for the same underlying things. 
@@ -4468,6 +4468,7 @@ local function citation0( config, args)
 
     local Series = A['Series'];
     
+    local City;                                                                 -- Added the City for London Gazette citation
     local Volume;
     local Issue;
     local Page;
@@ -4477,6 +4478,7 @@ local function citation0( config, args)
     if in_array (config.CitationClass, cfg.templates_using_volume) and not ('conference' == config.CitationClass and not is_set (Periodical)) then
         Volume = A['Volume'];
     end
+
     if in_array (config.CitationClass, cfg.templates_using_issue) and not (in_array (config.CitationClass, {'conference', 'map'}) and not is_set (Periodical))then
         Issue = A['Issue'];
     end
@@ -4934,6 +4936,13 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         coins_author = c;                                                       -- use that instead
     end
 
+    -- This is just for Gazette since the cities in Gazette represent the particular Gazette which could be linked to other cities
+    if config.CitationClass == 'gazette' then
+        local city_names = {['b'] = 'Belfast', ['belfast'] = 'Belfast', ['e'] = 'Edinburgh', ['edinburgh'] = 'Edinburgh'};
+        City = A['City'] and A['City']:lower();                              -- lower() to index into the city_names table
+        City = city_names[City] or 'London';                                  -- the city, or default to London
+    end
+
     -- this is the function call to COinS()
     --local OCinSoutput = COinS({
     return {
@@ -4949,6 +4958,7 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         ['Chron'] =  COinS_date.rftchron or (not COinS_date.rftdate and Date) or '',    -- chron but if not set and invalid date format use Date; keep this last bit?
         ['Series'] = Series,
         ['Volume'] = Volume,
+        ['City'] = City,
         ['Issue'] = Issue,
         ['Pages'] = get_coins_pages (first_set ({Sheet, Sheets, Page, Pages, At}, 5)),              -- pages stripped of external links
         ['Edition'] = Edition,
