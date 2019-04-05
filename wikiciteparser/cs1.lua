@@ -4358,6 +4358,35 @@ local function citation0( config, args)
     Load Input Parameters
     The argument_wrapper facilitates the mapping of multiple aliases to single internal variable.
     ]]
+
+    -- This is for the new template
+    local exception_citation_tmpl = {'harvnb', 'brackets'}
+
+    if in_array(config.CitationClass, exception_citation_tmpl) then
+
+        local keyset={}
+        local n=0
+        for k,_ in pairs(args) do
+            table.insert(keyset, k)
+        end
+        table.sort(keyset)
+
+        for i,k in ipairs(keyset) do
+            if tonumber(k) ~= nil then
+                v = args[k]
+                -- Checks if the year is a number or alphanumeric since the format can be 2007 or 2007a
+                if (tonumber(v) ~= nil) or (string.find(v, "%d") and true or false) then
+                    args["year"] = args[k]
+                    args[k] = nil
+                elseif type(v) == 'string' then
+                    args["last" .. k] = args[k]
+                    args[k] = nil
+                end
+            end
+        end
+    end
+
+
     local A = argument_wrapper( args );
     local i
 
@@ -4618,6 +4647,7 @@ When the citation has these parameters:
 All other combinations of |encyclopedia, |title, and |article are not modified
 
 ]]
+
 
 local Encyclopedia = A['Encyclopedia'];
 
@@ -5708,10 +5738,11 @@ local function cite_args(orig_args)
     local error_text, error_state;
 
     local config = {};
+
     for k, v in pairs( orig_args ) do
         config[k] = v;
         args[k] = v;       
-    end 
+    end
 
     local capture;                                                              -- the single supported capture when matching unknown parameters using patterns
     for k, v in pairs( orig_args ) do
@@ -5745,6 +5776,7 @@ local function cite_args(orig_args)
             has_invisible_chars (k, v);
         end
     end
+
     return citation0( config, args)
 end
 
