@@ -29,7 +29,8 @@ citation_template_names = set([
     'London Gazette',
     'Harvnb',
     'Harvard citation no brackets',
-    'NRISref'
+    'NRISref',
+    'Cite gnis'
     # TODO more could be added,
     # see https://en.wikipedia.org/wiki/
     #    Category:Citation_Style_1_specific-source_templates

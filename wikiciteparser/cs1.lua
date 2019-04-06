@@ -915,6 +915,7 @@ is handled in the main module.
 local templates_using_volume = {'citation', 'audio-visual', 'book', 'conference', 'encyclopaedia', 'interview', 'journal', 'magazine', 'map', 'news', 'report', 'techreport'}
 local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news', 'gazette'}
 local templates_not_using_page = {'audio-visual', 'episode', 'mailinglist', 'newsgroup', 'podcast', 'serial', 'sign', 'speech'}
+local templates_using_accessdate = {'nrisref', 'gnis'}
 
 
 
@@ -4402,9 +4403,40 @@ local function citation0( config, args)
                 args["seriesno"] = args[k]
                 args[k] = nil
             end
-            if tonumber(k) ~= nil then
+            if tonumber(k) ~= nil or k == 'version' then
                 if (string.find(args[k], "%d") and true or false) then
                     args["series"] = args[k]
+                    args[k] = nil
+                end
+            end
+        end
+    end
+
+    if 'gnis' == config.CitationClass then
+        local keyset = get_sorted_keys(args)
+        for i,k in ipairs(keyset) do
+            if tonumber(k) ~= nil then
+                v = args[k]
+                if (tonumber(v) ~= nil) then
+                    args['seriesno'] = args[k]
+                    args[k] = nil
+                else
+                    date_or_not,_ = check_date(args[k], nil)
+                    if date_or_not then
+                        args["accessdate"] = args[k]
+                        args[k] = nil
+                    else
+                        args["title"] = args[k]
+                        args[k] = nil
+                    end
+                end
+            else
+                if k == 'id' then
+                    args['seriesno'] = args[k]
+                    args[k] = nil
+                end
+                if k == 'name' then
+                    args["title"] = args[k]
                     args[k] = nil
                 end
             end
@@ -4558,8 +4590,8 @@ local function citation0( config, args)
     local Via = A['Via'];
 
     local AccessDate;
-    -- This is just for nrisref template
-    if config.CitationClass == 'nrisref' then
+    -- This is just for templates which want to have accessdate
+    if in_array(config.CitationClass, templates_using_accessdate) then
         AccessDate = A['AccessDate']
     end
 
@@ -5002,8 +5034,13 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         City = city_names[City] or 'London';                                  -- the city, or default to London
     end
 
-    if config.CitationClass == 'nrisref' then
+    if in_array(config.CitationClass, templates_using_accessdate) then
         SeriesNumber = A['SeriesNumber']
+    end
+
+    -- The type only exists for map types which are present in antartic and for this specific citation
+    if config.CitationClass == 'gnis' then
+        TitleType = A['TitleType']
     end
 
     -- this is the function call to COinS()
@@ -5032,7 +5069,8 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         ['ID_list'] = ID_list,
         ['RawPage'] = this_page.prefixedText,
         ['AccessDate'] = AccessDate,
-        ['SeriesNumber'] = SeriesNumber
+        ['SeriesNumber'] = SeriesNumber,
+        ['TitleType'] = TitleType
     }; -- , config.CitationClass);
 
 end
