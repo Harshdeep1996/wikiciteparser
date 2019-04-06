@@ -916,6 +916,7 @@ local templates_using_volume = {'citation', 'audio-visual', 'book', 'conference'
 local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news', 'gazette'}
 local templates_not_using_page = {'audio-visual', 'episode', 'mailinglist', 'newsgroup', 'podcast', 'serial', 'sign', 'speech'}
 local templates_using_accessdate = {'nrisref', 'gnis'}
+local templates_using_series_no_as_id = {'nrisref', 'gnis', 'geonet3'}
 
 
 
@@ -4373,6 +4374,7 @@ local function citation0( config, args)
 
     -- This is for the new template
     local exception_citation_tmpl = {'harvnb', 'brackets'}
+    local maps_citation_tmpl = {'gnis', 'geonet3'}
 
     if in_array(config.CitationClass, exception_citation_tmpl) then
         local keyset = get_sorted_keys(args)
@@ -4412,7 +4414,7 @@ local function citation0( config, args)
         end
     end
 
-    if 'gnis' == config.CitationClass then
+    if in_array(config.CitationClass, maps_citation_tmpl) then
         local keyset = get_sorted_keys(args)
         for i,k in ipairs(keyset) do
             if tonumber(k) ~= nil then
@@ -5034,7 +5036,7 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         City = city_names[City] or 'London';                                  -- the city, or default to London
     end
 
-    if in_array(config.CitationClass, templates_using_accessdate) then
+    if in_array(config.CitationClass, templates_using_series_no_as_id) then
         SeriesNumber = A['SeriesNumber']
     end
 
