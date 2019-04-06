@@ -100,7 +100,7 @@ def parse_citation_dict(arguments, template_name='citation'):
     split_template_name = template_name.strip().split(' ')
     template_name = split_template_name[-1] if len(split_template_name) > 1 else split_template_name[0]
 
-    if template_name in ['Gazette', 'Harvnb', 'NRISref', 'GNIS', 'GEOnet3']:
+    if template_name in ['Gazette', 'Harvnb', 'NRISref', 'GNIS', 'GEOnet3', 'Policy']:
         template_name = template_name.lower()
 
     arguments['CitationClass'] = template_name
