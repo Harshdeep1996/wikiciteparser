@@ -30,7 +30,8 @@ citation_template_names = set([
     'Harvnb',
     'Harvard citation no brackets',
     'NRISref',
-    'Cite gnis'
+    'Cite gnis',
+    'GNIS'
     # TODO more could be added,
     # see https://en.wikipedia.org/wiki/
     #    Category:Citation_Style_1_specific-source_templates
