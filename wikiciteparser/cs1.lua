@@ -2594,6 +2594,7 @@ local function argument_wrapper( args )
     },
     {
         __index = function ( tbl, k )
+
             if origin[k] ~= nil then
                 return nil;
             end
@@ -2618,7 +2619,7 @@ local function argument_wrapper( args )
                 v = cfg.defaults[k] or '';
                 origin[k] = '';
             end
-            
+
             tbl = rawset( tbl, k, v );
             return v;
         end,
@@ -4353,6 +4354,16 @@ This is the main function doing the majority of the citation formatting.
 
 ]]
 
+local function get_sorted_keys(args)
+    local keyset={}
+    local n=0
+    for k,_ in pairs(args) do
+        table.insert(keyset, k)
+    end
+    table.sort(keyset)
+    return keyset
+end
+
 local function citation0( config, args)
     --[[ 
     Load Input Parameters
@@ -4363,14 +4374,7 @@ local function citation0( config, args)
     local exception_citation_tmpl = {'harvnb', 'brackets'}
 
     if in_array(config.CitationClass, exception_citation_tmpl) then
-
-        local keyset={}
-        local n=0
-        for k,_ in pairs(args) do
-            table.insert(keyset, k)
-        end
-        table.sort(keyset)
-
+        local keyset = get_sorted_keys(args)
         for i,k in ipairs(keyset) do
             if tonumber(k) ~= nil then
                 v = args[k]
@@ -4386,6 +4390,26 @@ local function citation0( config, args)
         end
     end
 
+    -- This is for chaning the version section of nrisref citation template to series and change other names
+    if 'nrisref' == config.CitationClass then
+        local keyset = get_sorted_keys(args)
+        for i,k in ipairs(keyset) do
+            if k == 'name' then
+                args["title"] = args[k]
+                args[k] = nil
+            end
+            if k == 'refnum' then
+                args["seriesno"] = args[k]
+                args[k] = nil
+            end
+            if tonumber(k) ~= nil then
+                if (string.find(args[k], "%d") and true or false) then
+                    args["series"] = args[k]
+                    args[k] = nil
+                end
+            end
+        end
+    end
 
     local A = argument_wrapper( args );
     local i
@@ -4494,7 +4518,6 @@ local function citation0( config, args)
     local ConferenceURLorigin = A:ORIGIN('ConferenceURL');                      -- get name of parameter that holds ConferenceURL
     local Periodical = A['Periodical'];
     local Periodical_origin = A:ORIGIN('Periodical');                           -- get the name of the periodical parameter
-
     local Series = A['Series'];
     
     local City;                                                                 -- Added the City for London Gazette citation
@@ -4533,7 +4556,13 @@ local function citation0( config, args)
         end
 
     local Via = A['Via'];
-    local AccessDate = A['AccessDate'];
+
+    local AccessDate;
+    -- This is just for nrisref template
+    if config.CitationClass == 'nrisref' then
+        AccessDate = A['AccessDate']
+    end
+
     local ArchiveDate = A['ArchiveDate'];
     local Agency = A['Agency'];
     local DeadURL = A['DeadURL']
@@ -4973,6 +5002,10 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         City = city_names[City] or 'London';                                  -- the city, or default to London
     end
 
+    if config.CitationClass == 'nrisref' then
+        SeriesNumber = A['SeriesNumber']
+    end
+
     -- this is the function call to COinS()
     --local OCinSoutput = COinS({
     return {
@@ -4998,6 +5031,8 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         ['Authors'] = coins_author,
         ['ID_list'] = ID_list,
         ['RawPage'] = this_page.prefixedText,
+        ['AccessDate'] = AccessDate,
+        ['SeriesNumber'] = SeriesNumber
     }; -- , config.CitationClass);
 
 end
