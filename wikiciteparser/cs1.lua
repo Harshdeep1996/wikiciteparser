@@ -915,8 +915,8 @@ is handled in the main module.
 local templates_using_volume = {'citation', 'audio-visual', 'book', 'conference', 'encyclopaedia', 'interview', 'journal', 'magazine', 'map', 'news', 'report', 'techreport'}
 local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news', 'gazette'}
 local templates_not_using_page = {'audio-visual', 'episode', 'mailinglist', 'newsgroup', 'podcast', 'serial', 'sign', 'speech'}
-local templates_using_accessdate = {'nrisref', 'gnis', 'policy'}
-local templates_using_series_no_as_id = {'nrisref', 'gnis', 'geonet3'}
+local templates_using_accessdate = {'nrisref', 'gnis', 'policy', 'season'}
+local templates_using_series_no_as_id = {'nrisref', 'gnis', 'geonet3', 'season'}
 
 
 
@@ -4445,6 +4445,36 @@ local function citation0( config, args)
         end
     end
 
+    if config.CitationClass == 'season' then
+        local keyset = get_sorted_keys(args)
+        for i,k in ipairs(keyset) do
+            if tonumber(k) ~= nil  then
+                v = args[k]
+                date_or_not,_ = check_date(args[k], nil)
+                if date_or_not then
+                    args["year"] = args[k]
+                    args[k] = nil
+                else
+                    args["seriesno"] = args[k]
+                    args[k] = nil
+                end
+            else
+                if k == 'id' then
+                    args['seriesno'] = args[k]
+                    args[k] = nil
+                end
+                if k == 'name' then
+                    args["title"] = args[k]
+                    args[k] = nil
+                end
+                if k == 'season' then
+                    args["year"] = args[k]
+                    args[k] = nil
+                end
+            end
+        end
+    end
+
     local A = argument_wrapper( args );
     local i
 
@@ -4852,8 +4882,9 @@ local Encyclopedia = A['Encyclopedia'];
             Date = AirDate;
         end
 
+        local Season;
         if 'episode' == config.CitationClass then                               -- handle the oddities that are strictly {{cite episode}}
-            local Season = A['Season'];
+            Season = A['Season'];
             local SeriesNumber = A['SeriesNumber'];
 
             if is_set (Season) and is_set (SeriesNumber) then                   -- these are mutually exclusive so if both are set
@@ -5056,7 +5087,7 @@ Date validation supporting code is in Module:Citation/CS1/Date_validation
         ['Title'] = make_coins_title (coins_title, ScriptTitle),                -- Title and ScriptTitle stripped of bold / italic wikimarkup
         ['PublicationPlace'] = PublicationPlace,
         ['Date'] = COinS_date.rftdate,                                          -- COinS_date has correctly formatted date if Date is valid;
-        ['Season'] = COinS_date.rftssn,
+        ['Season'] = Season,
         ['Chron'] =  COinS_date.rftchron or (not COinS_date.rftdate and Date) or '',    -- chron but if not set and invalid date format use Date; keep this last bit?
         ['Series'] = Series,
         ['Volume'] = Volume,
