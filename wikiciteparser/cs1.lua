@@ -915,8 +915,8 @@ is handled in the main module.
 local templates_using_volume = {'citation', 'audio-visual', 'book', 'conference', 'encyclopaedia', 'interview', 'journal', 'magazine', 'map', 'news', 'report', 'techreport'}
 local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news', 'gazette'}
 local templates_not_using_page = {'audio-visual', 'episode', 'mailinglist', 'newsgroup', 'podcast', 'serial', 'sign', 'speech'}
-local templates_using_accessdate = {'nrisref', 'gnis', 'policy', 'season', 'sports-reference'}
-local templates_using_series_no_as_id = {'nrisref', 'gnis', 'geonet3', 'season'}
+local templates_using_accessdate = {'nrisref', 'gnis', 'policy', 'season', 'sports-reference', 'nhle', 'england'}
+local templates_using_series_no_as_id = {'nrisref', 'gnis', 'geonet3', 'season', 'nhle', 'england'}
 
 
 
@@ -4375,6 +4375,7 @@ local function citation0( config, args)
     -- This is for the new template
     local exception_citation_tmpl = {'harvnb', 'brackets'}
     local maps_citation_tmpl = {'gnis', 'geonet3'}
+    local heritage_england_citation_tmpl = {'nhle', 'england'}
 
     if in_array(config.CitationClass, exception_citation_tmpl) then
         local keyset = get_sorted_keys(args)
@@ -4489,6 +4490,25 @@ local function citation0( config, args)
             if k == '3' then
                 args["accessdate"] = args[k]
                 args[k] = nil
+            end
+        end
+    end
+
+    if in_array(config.CitationClass, heritage_england_citation_tmpl) then
+        local keyset = get_sorted_keys(args)
+        for i,k in ipairs(keyset) do
+            if tonumber(k) ~= nil then
+                args['seriesno'] = args[k]
+                args[k] = nil
+            else
+                if k == 'num' then
+                    args['seriesno'] = args[k]
+                    args[k] = nil
+                end
+                if k == 'desc' then
+                    args["title"] = args[k]
+                    args[k] = nil
+                end
             end
         end
     end
