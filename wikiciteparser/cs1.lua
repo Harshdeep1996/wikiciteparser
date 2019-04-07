@@ -915,7 +915,7 @@ is handled in the main module.
 local templates_using_volume = {'citation', 'audio-visual', 'book', 'conference', 'encyclopaedia', 'interview', 'journal', 'magazine', 'map', 'news', 'report', 'techreport'}
 local templates_using_issue = {'citation', 'conference', 'episode', 'interview', 'journal', 'magazine', 'map', 'news', 'gazette'}
 local templates_not_using_page = {'audio-visual', 'episode', 'mailinglist', 'newsgroup', 'podcast', 'serial', 'sign', 'speech'}
-local templates_using_accessdate = {'nrisref', 'gnis', 'policy', 'season'}
+local templates_using_accessdate = {'nrisref', 'gnis', 'policy', 'season', 'sports-reference'}
 local templates_using_series_no_as_id = {'nrisref', 'gnis', 'geonet3', 'season'}
 
 
@@ -4471,6 +4471,24 @@ local function citation0( config, args)
                     args["year"] = args[k]
                     args[k] = nil
                 end
+            end
+        end
+    end
+
+    if config.CitationClass == 'sports-reference' then
+        local keyset = get_sorted_keys(args)
+        for i,k in ipairs(keyset) do
+            if k == '1' then
+                args['title'] = args[k]
+                args[k] = nil
+            end
+            if k == '2' then
+                args["url"] = args[k]
+                args[k] = nil
+            end
+            if k == '3' then
+                args["accessdate"] = args[k]
+                args[k] = nil
             end
         end
     end

@@ -34,7 +34,8 @@ citation_template_names = set([
     'GNIS',
     'GEOnet3',
     'Timatic Visa Policy',
-    'Soccerbase season'
+    'Soccerbase season',
+    'Cite sports-reference'
     # TODO more could be added,
     # see https://en.wikipedia.org/wiki/
     #    Category:Citation_Style_1_specific-source_templates
